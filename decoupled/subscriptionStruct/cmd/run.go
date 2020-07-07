@@ -16,7 +16,7 @@ func main() {
 
 	dailyProcess := subscription.NewProcessor(db, log.Printf, time.Now)
 
-	err = dailyProcess.Run()
+	err = dailyProcess.RunDailyBatch()
 	if err != nil {
 		log.Fatalf("unable to run daily billing: %s", err)
 	}

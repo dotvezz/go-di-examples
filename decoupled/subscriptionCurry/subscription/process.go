@@ -9,11 +9,12 @@ import (
 type TokenSelector func(day int) ([]string, error)
 type TokenProcessor func(token string) error
 type Logger func(string, ...interface{})
+type TimeFunc func() time.Time
 
 // NewDailyProcessor returns a func set up to run every day and bills the $9.99 monthly subscriptionCurry to
 // customers if today is their billing day.
 // Billing day is the day of the month the subscriptionCurry started, or the 28th, whichever is earliest.
-func NewDailyProcessor(tokensFor TokenSelector, process TokenProcessor, log Logger, now func() time.Time) func() error {
+func NewDailyProcessor(tokensFor TokenSelector, process TokenProcessor, log Logger, now TimeFunc) func() error {
 	return func() error {
 		ts, err := tokensFor(now().Day())
 		if err != nil {
@@ -30,7 +31,6 @@ func NewDailyProcessor(tokensFor TokenSelector, process TokenProcessor, log Logg
 		return nil
 	}
 }
-
 
 // NewTokenSelector returns a func set up to select subscriptionCurry billing tokens for a given billing day
 func NewTokenSelector(db *sql.DB) func(day int) ([]string, error) {

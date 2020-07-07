@@ -14,7 +14,6 @@ func main() {
 		log.Fatalf("unable to run daily billing: %s", err)
 	}
 
-
 	selectTokens := subscription.NewTokenSelector(db)
 	dailyProcess := subscription.NewDailyProcessor(selectTokens, subscription.ProcessToken, log.Printf, time.Now)
 

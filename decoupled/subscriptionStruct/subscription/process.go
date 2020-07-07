@@ -9,20 +9,17 @@ import (
 type TokenSelector func(day int) ([]string, error)
 type tokenProcessor func(token string) error
 type Logger func(string, ...interface{})
+type TimeFunc func() time.Time
 
-type Processor interface {
-	Run() error
-}
-
-type processor struct {
+type Processor struct {
 	db      *sql.DB
 	process tokenProcessor
 	log     Logger
-	now     func() time.Time
+	now     TimeFunc
 }
 
-func NewProcessor(db *sql.DB, log Logger, now func() time.Time) Processor {
-	return &processor{
+func NewProcessor(db *sql.DB, log Logger, now TimeFunc) *Processor {
+	return &Processor{
 		db:      db,
 		log:     log,
 		now:     now,
@@ -30,10 +27,9 @@ func NewProcessor(db *sql.DB, log Logger, now func() time.Time) Processor {
 	}
 }
 
-// NewProcessDaily returns a func set up to run every day and bills the $9.99 monthly subscriptionCurry to
-// customers if today is their billing day.
+// RunDailyBatch bills the $9.99 monthly subscriptionCurry to  customers if today is their billing day.
 // Billing day is the day of the month the subscriptionCurry started, or the 28th, whichever is earliest.
-func (p *processor) Run() error {
+func (p *Processor) RunDailyBatch() error {
 	ts, err := p.tokensFor(p.now().Day())
 	if err != nil {
 		return fmt.Errorf("unable to process subscriptions: %w", err)
@@ -49,8 +45,8 @@ func (p *processor) Run() error {
 	return nil
 }
 
-// NewTokenSelector returns a func set up to select subscriptionCurry billing tokens for a given billing day
-func (p *processor) tokensFor(day int) ([]string, error) {
+// tokensFor elects billing tokens for a given billing day
+func (p *Processor) tokensFor(day int) ([]string, error) {
 	q := "SELECT `token` FROM `subscriptions` WHERE DAY(`startedDate`) = ?"
 	if day == 28 {
 		q = "SELECT `token` FROM `subscriptions` WHERE DAY(`startedDate`) >= ?"

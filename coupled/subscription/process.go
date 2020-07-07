@@ -25,7 +25,7 @@ func ProcessDaily(db *sql.DB) error {
 
 	for rows.Next() {
 		var token string
-		 _ = rows.Scan(&token)
+		_ = rows.Scan(&token)
 
 		err = processSubscription(token)
 		if err != nil {
