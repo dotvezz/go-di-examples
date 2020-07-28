@@ -32,31 +32,10 @@ func NewDailyProcessor(tokensFor TokenSelector, process TokenProcessor, log Logg
 	}
 }
 
-// NewTokenSelector returns a func set up to select subscriptionCurry billing tokens for a given billing day
-func NewTokenSelector(db *sql.DB) func(day int) ([]string, error) {
-	return func(day int) ([]string, error) {
-		q := "SELECT `token` FROM `subscriptions` WHERE DAY(`startedDate`) = ?"
-		if day == 28 {
-			q = "SELECT `token` FROM `subscriptions` WHERE DAY(`startedDate`) >= ?"
-		} else if day > 28 {
-			return make([]string, 0), nil
-		}
-
-		rows, err := db.Query(q, day)
-		if err != nil {
-			return nil, fmt.Errorf("unable to run query for processing subscriptions: %w", err)
-		}
-
-		var ts []string
-		for rows.Next() {
-			var token string
-			_ = rows.Scan(&token)
-			ts = append(ts, token)
-		}
-		return ts, nil
-	}
+func ProcessToken(token string) error {
+	return nil
 }
 
-func ProcessToken(token string) error {
+func NewTokenSelector(db *sql.DB) TokenSelector {
 	return nil
 }
